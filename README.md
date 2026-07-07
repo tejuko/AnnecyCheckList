@@ -44,11 +44,14 @@ Daarna werkt de lijst ook **zonder internet** en opent hij als een echte app.
 
 ---
 
-## Belangrijk om te weten
-- **Vinkjes zijn per apparaat.** Jij en Liam hebben elk je eigen vinkjes/bewerkingen
-  (die worden lokaal in de browser bewaard). Wil je jouw ingevulde versie doorsturen?
-  Gebruik dan de knop **🔗 Deel-link kopiëren** in de app — die stopt jouw hele lijst
-  (inclusief vinkjes, bewerkingen en volgorde) in de URL. Of gebruik **📋 Als tekst (WhatsApp)**.
+## Live sync tussen apparaten
+De lijst synchroniseert automatisch via een gratis Firebase Realtime Database.
+Wat jij of Liam aan-/afvinkt, bewerkt of versleept, verschijnt binnen enkele seconden
+op het andere apparaat. In de balk zie je een **"Gesynchroniseerd"**-lampje; ben je
+even offline, dan wordt alles lokaal bewaard en bijgewerkt zodra je weer verbinding hebt.
+
+De sync-instelling staat in `index.html` (`const SYNC_URL = ...`). Zet je die leeg,
+dan werkt de app puur lokaal (per apparaat) verder.
 - **Later iets aanpassen?** Vervang `index.html` in de repo (Add file → Upload files) en
   open daarna `sw.js`, verhoog het versienummer één stap (`annecy-paklijst-v1` → `-v2`),
   en commit. Zo krijgen jullie de nieuwe versie automatisch binnen.

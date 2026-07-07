@@ -89,6 +89,13 @@
   .overall .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--lake), var(--lake-deep)); border-radius: 99px; transition: width .35s ease; }
   .overall .count { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sync { font-size: 12px; font-weight: 600; color: var(--ink-faint); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .sync[hidden] { display: none; }
+  .sync::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-faint); flex: none; }
+  .sync.ok { color: var(--good); } .sync.ok::before { background: var(--good); }
+  .sync.busy { color: var(--lake-deep); } .sync.busy::before { background: var(--lake); animation: pulse 1s ease-in-out infinite; }
+  .sync.off { color: var(--clay-deep); } .sync.off::before { background: var(--clay); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
   button { font: inherit; }
   .btn {
     font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--card); color: var(--ink);
@@ -191,6 +198,7 @@
       <button class="btn ghost" id="btnPrint">🖨️ Print</button>
       <button class="btn ghost" id="btnReset">↺ Reset</button>
     </div>
+    <span class="sync" id="syncstatus" hidden></span>
   </div>
 </div>
 
@@ -309,6 +317,65 @@ function loadState(){
 function saveState(){
   try { localStorage.setItem("annecy2026", JSON.stringify(state)); } catch(e){}
   history.replaceState(null, "", "#s=" + b64enc(state));
+  schedulePush();
+}
+
+/* ---------------- Cloud sync (Firebase Realtime DB, REST) ----------------
+   Vul SYNC_URL met je database-URL + "/lists/annecy.json". Leeg = sync uit. */
+const SYNC_URL = "https://annecy-paklijst-default-rtdb.europe-west1.firebasedatabase.app/lists/annecy.json";
+let localT = Number(localStorage.getItem("annecy2026_t") || 0);
+let deviceId = localStorage.getItem("annecy2026_dev");
+if (!deviceId){ deviceId = Math.random().toString(36).slice(2) + "-" + Date.now().toString(36); localStorage.setItem("annecy2026_dev", deviceId); }
+let pushTimer = null;
+function syncOn(){ return /^https?:\/\//.test(SYNC_URL); }
+function setSyncStatus(txt, cls){
+  const el = document.getElementById("syncstatus");
+  if (!el) return;
+  if (!txt){ el.hidden = true; return; }
+  el.hidden = false; el.textContent = txt; el.className = "sync " + (cls || "");
+}
+function schedulePush(){
+  if (!syncOn()) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushRemote, 700);
+}
+async function pushRemote(){
+  if (!syncOn()) return;
+  const t = Date.now(); localT = t;
+  try { localStorage.setItem("annecy2026_t", String(t)); } catch(_){}
+  const payload = JSON.stringify({ c: state.c, l: state.l, d: state.d, x: state.x, o: state.o, co: state.co, _t: t, _by: deviceId });
+  try {
+    setSyncStatus("Synchroniseren…", "busy");
+    const r = await fetch(SYNC_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: payload });
+    if (!r.ok) throw new Error("bad");
+    setSyncStatus("Gesynchroniseerd", "ok");
+  } catch(e){ setSyncStatus("Offline — lokaal bewaard", "off"); }
+}
+async function pullRemote(initial){
+  if (!syncOn()) return;
+  try {
+    const r = await fetch(SYNC_URL, { headers: { "Accept": "application/json" }, cache: "no-store" });
+    if (!r.ok) throw new Error("bad");
+    const data = await r.json();
+    if (data && typeof data._t === "number"){
+      if (data._t > localT){
+        state = normalize(data); localT = data._t;
+        try { localStorage.setItem("annecy2026", JSON.stringify(state)); localStorage.setItem("annecy2026_t", String(localT)); } catch(_){}
+        history.replaceState(null, "", "#s=" + b64enc(state));
+        render();
+      }
+      setSyncStatus("Gesynchroniseerd", "ok");
+    } else if (initial){
+      pushRemote(); // remote nog leeg: onze lijst als startpunt zetten
+    }
+  } catch(e){ setSyncStatus("Offline — lokaal bewaard", "off"); }
+}
+function initSync(){
+  if (!syncOn()){ setSyncStatus("", ""); return; }
+  pullRemote(true);
+  setInterval(() => pullRemote(false), 4000);
+  window.addEventListener("online", () => pullRemote(false));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pullRemote(false); });
 }
 
 /* ---------------- Helpers ---------------- */
@@ -641,6 +708,7 @@ document.getElementById("btnReset").addEventListener("click", () => {
     localStorage.removeItem("annecy2026");
     history.replaceState(null, "", location.pathname);
     render();
+    pushRemote(); // reset ook naar de andere apparaten doorzetten
     toast("↺ Lijst teruggezet naar origineel");
   }
 });
@@ -648,6 +716,7 @@ document.getElementById("btnReset").addEventListener("click", () => {
 /* ---------------- Init ---------------- */
 loadState();
 render();
+initSync();
 </script>
 
 <script>
