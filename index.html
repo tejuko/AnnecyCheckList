@@ -13,6 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Paklijst Annecy">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>try{var t=localStorage.getItem("annecy_theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <style>
   :root {
     --paper: #eceeed;
@@ -83,7 +84,8 @@
     background: color-mix(in srgb, var(--paper) 88%, transparent);
     backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); margin-bottom: 30px;
   }
-  .toolbar-inner { max-width: 1040px; margin: 0 auto; padding: 13px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .toolbar-inner { max-width: 1040px; margin: 0 auto; padding: 13px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; transition: padding .22s ease; }
+  .btn.icon { padding: 8px 10px; }
   .overall { display: flex; align-items: center; gap: 12px; flex: 1 1 240px; min-width: 200px; }
   .overall .bar { flex: 1; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
   .overall .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--lake), var(--lake-deep)); border-radius: 99px; transition: width .35s ease; }
@@ -177,6 +179,15 @@
   .toast .undo { border: 1px solid rgba(255,255,255,.28); background: transparent; color: #6fe0d3; font: inherit; font-weight: 700; padding: 5px 11px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
   .toast .undo:hover { background: rgba(255,255,255,.1); }
 
+  /* Mobiel: balk krimpt tijdens het scrollen tot een slanke voortgangsbalk */
+  @media (max-width: 640px) {
+    .toolbar-inner { padding: 10px 16px; gap: 12px; }
+    body.scrolled .toolbar-inner { padding: 5px 14px; gap: 10px; }
+    body.scrolled .actions { display: none; }
+    body.scrolled .overall .count { font-size: 12px; }
+    body.scrolled .overall .bar { height: 6px; }
+  }
+
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   @media print {
     .toolbar, .actions, .add, .tools { display: none !important; }
@@ -193,10 +204,11 @@
       <span class="count" id="ocount">0 / 0</span>
     </div>
     <div class="actions">
-      <button class="btn primary" id="btnLink">🔗 Deel-link kopiëren</button>
-      <button class="btn" id="btnText">📋 Als tekst (WhatsApp)</button>
-      <button class="btn ghost" id="btnPrint">🖨️ Print</button>
-      <button class="btn ghost" id="btnReset">↺ Reset</button>
+      <button class="btn ghost icon" id="btnTheme" title="Wissel licht/donker" aria-label="Wissel licht of donker thema">🌙</button>
+      <button class="btn primary" id="btnLink">🔗 <span class="lbl">Deel-link kopiëren</span></button>
+      <button class="btn" id="btnText">📋 <span class="lbl">Als tekst (WhatsApp)</span></button>
+      <button class="btn ghost" id="btnPrint">🖨️ <span class="lbl">Print</span></button>
+      <button class="btn ghost" id="btnReset">↺ <span class="lbl">Reset</span></button>
     </div>
     <span class="sync" id="syncstatus" hidden></span>
   </div>
@@ -712,6 +724,34 @@ document.getElementById("btnReset").addEventListener("click", () => {
     toast("↺ Lijst teruggezet naar origineel");
   }
 });
+
+/* ---------------- Thema (licht/donker) ---------------- */
+function currentTheme(){
+  const attr = document.documentElement.getAttribute("data-theme");
+  if (attr === "dark" || attr === "light") return attr;
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function applyThemeIcon(){
+  const btn = document.getElementById("btnTheme");
+  if (!btn) return;
+  const dark = currentTheme() === "dark";
+  btn.textContent = dark ? "☀️" : "🌙";
+  btn.title = dark ? "Schakel naar licht thema" : "Schakel naar donker thema";
+}
+document.getElementById("btnTheme").addEventListener("click", () => {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("annecy_theme", next); } catch(_){}
+  applyThemeIcon();
+});
+applyThemeIcon();
+
+/* ---------------- Mobiel: balk laten krimpen bij scrollen ---------------- */
+let _scrolled = false;
+window.addEventListener("scroll", () => {
+  const s = window.scrollY > 60;
+  if (s !== _scrolled){ _scrolled = s; document.body.classList.toggle("scrolled", s); }
+}, { passive: true });
 
 /* ---------------- Init ---------------- */
 loadState();
