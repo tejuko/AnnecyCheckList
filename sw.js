@@ -1,7 +1,7 @@
 /* Service worker — maakt de paklijst offline beschikbaar.
    Bump de versie (v1 -> v2 -> ...) als je index.html wijzigt,
    zodat de nieuwe versie bij bezoekers wordt geladen. */
-const CACHE = "annecy-paklijst-v4";
+const CACHE = "annecy-paklijst-v5";
 const ASSETS = [
   "./",
   "./index.html",

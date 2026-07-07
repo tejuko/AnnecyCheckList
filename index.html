@@ -82,10 +82,17 @@
   .toolbar {
     position: sticky; top: 0; z-index: 20;
     background: color-mix(in srgb, var(--paper) 88%, transparent);
-    backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); margin-bottom: 30px;
+    backdrop-filter: blur(10px); margin-bottom: 30px;
     /* Duw de balk onder de Dynamic Island / notch in de geïnstalleerde app */
     padding-top: env(safe-area-inset-top, 0px);
   }
+  .tabs { display: flex; gap: 4px; max-width: 1040px; margin: 0 auto; padding: 0 max(14px, env(safe-area-inset-left)) 0 max(14px, env(safe-area-inset-right)); border-bottom: 1px solid var(--line); }
+  .tab { flex: 1; min-width: 0; border: none; background: transparent; color: var(--ink-soft); font: inherit; font-weight: 700; font-size: 14px; padding: 9px 6px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; border-bottom: 2.5px solid transparent; margin-bottom: -1px; border-radius: 9px 9px 0 0; transition: color .15s, background .15s; }
+  .tab .tcount { font-size: 11px; font-weight: 600; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .tab:hover { background: var(--line-soft); }
+  .tab.active { color: var(--accent-deep); border-bottom-color: var(--accent); }
+  .tab.active .tcount { color: var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .toolbar-inner { max-width: 1040px; margin: 0 auto; padding: 13px max(20px, env(safe-area-inset-right)) 13px max(20px, env(safe-area-inset-left)); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; transition: padding .22s ease; }
   .btn.icon { padding: 8px 10px; }
   .overall { display: flex; align-items: center; gap: 12px; flex: 1 1 240px; min-width: 200px; }
@@ -113,7 +120,8 @@
   .btn.ghost { background: transparent; }
   :focus-visible { outline: 2px solid var(--lake); outline-offset: 2px; }
 
-  .person { margin-bottom: 40px; scroll-margin-top: 80px; }
+  .person { margin-bottom: 40px; scroll-margin-top: 80px; display: none; }
+  .person.active { display: block; }
   .person-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 22px; border-bottom: 2px solid var(--accent); }
   .person-head h2 { font-family: Georgia, serif; font-size: 30px; margin: 0; letter-spacing: -.01em; color: var(--accent-deep); }
   .person-head .tag { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; }
@@ -193,6 +201,7 @@
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   @media print {
     .toolbar, .actions, .add, .tools { display: none !important; }
+    .person { display: block !important; } /* print alle personen, niet alleen actieve tab */
     body { background: #fff; }
     .cat { break-inside: avoid; box-shadow: none; }
   }
@@ -214,6 +223,7 @@
     </div>
     <span class="sync" id="syncstatus" hidden></span>
   </div>
+  <nav class="tabs" id="tabs" aria-label="Personen"></nav>
 </div>
 
 <div class="wrap">
@@ -305,7 +315,34 @@ DATA.forEach(p => p.cats.forEach((cat, ci) => {
 let state = { c: {}, l: {}, d: {}, x: {}, o: {}, co: {} };
 let dragEl = null;   // an item <li> being dragged
 let dragCard = null; // a category card being dragged
+let activePerson = null; // welke tab (persoon) actief is
 const app = document.getElementById("app");
+
+function shortName(p){ return p.name.split(/[\s—]+/)[0]; }
+function validPerson(k){ return DATA.some(p => p.key === k); }
+function buildTabs(){
+  const el = document.getElementById("tabs");
+  if (!el) return;
+  el.innerHTML = "";
+  DATA.forEach(p => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tab " + p.cls; b.dataset.target = p.key;
+    b.innerHTML = `<span class="tname">${escapeHtml(shortName(p))}</span><span class="tcount" data-tcount="${p.key}"></span>`;
+    b.addEventListener("click", () => setActivePerson(p.key, true));
+    el.appendChild(b);
+  });
+}
+function applyActiveTab(){
+  document.querySelectorAll(".person").forEach(s => s.classList.toggle("active", s.id === activePerson));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.target === activePerson));
+}
+function setActivePerson(key, scroll){
+  if (!validPerson(key)) key = DATA[0].key;
+  activePerson = key;
+  try { localStorage.setItem("annecy_tab", key); } catch(_){}
+  applyActiveTab();
+  if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
+}
 
 function b64enc(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
 function b64dec(s){ try { return JSON.parse(decodeURIComponent(escape(atob(s)))); } catch(e){ return null; } }
@@ -337,7 +374,7 @@ function saveState(){
 /* ---------------- Cloud sync (Firebase Realtime DB, REST) ----------------
    Vul SYNC_URL met je database-URL + "/lists/annecy.json". Leeg = sync uit. */
 const SYNC_URL = "https://annecy-paklijst-default-rtdb.europe-west1.firebasedatabase.app/lists/annecy.json";
-let localT = Number(localStorage.getItem("annecy2026_t") || 0);
+let lastSeenT = null; // identiteit (_t) van de remote-versie die we nu lokaal weergeven
 let deviceId = localStorage.getItem("annecy2026_dev");
 if (!deviceId){ deviceId = Math.random().toString(36).slice(2) + "-" + Date.now().toString(36); localStorage.setItem("annecy2026_dev", deviceId); }
 let pushTimer = null;
@@ -355,15 +392,21 @@ function schedulePush(){
 }
 async function pushRemote(){
   if (!syncOn()) return;
-  const t = Date.now(); localT = t;
-  try { localStorage.setItem("annecy2026_t", String(t)); } catch(_){}
+  const t = Date.now() + "-" + Math.random().toString(36).slice(2, 8); // unieke schrijf-id (geen klokvergelijking tussen apparaten)
   const payload = JSON.stringify({ c: state.c, l: state.l, d: state.d, x: state.x, o: state.o, co: state.co, _t: t, _by: deviceId });
   try {
     setSyncStatus("Synchroniseren…", "busy");
     const r = await fetch(SYNC_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: payload });
     if (!r.ok) throw new Error("bad");
+    lastSeenT = t; // we geven nu deze schrijfactie weer
     setSyncStatus("Gesynchroniseerd", "ok");
   } catch(e){ setSyncStatus("Offline — lokaal bewaard", "off"); }
+}
+function adoptRemote(data){
+  state = normalize(data); lastSeenT = data._t;
+  try { localStorage.setItem("annecy2026", JSON.stringify(state)); } catch(_){}
+  history.replaceState(null, "", "#s=" + b64enc(state));
+  render();
 }
 async function pullRemote(initial){
   if (!syncOn()) return;
@@ -371,16 +414,21 @@ async function pullRemote(initial){
     const r = await fetch(SYNC_URL, { headers: { "Accept": "application/json" }, cache: "no-store" });
     if (!r.ok) throw new Error("bad");
     const data = await r.json();
-    if (data && typeof data._t === "number"){
-      if (data._t > localT){
-        state = normalize(data); localT = data._t;
-        try { localStorage.setItem("annecy2026", JSON.stringify(state)); localStorage.setItem("annecy2026_t", String(localT)); } catch(_){}
-        history.replaceState(null, "", "#s=" + b64enc(state));
-        render();
-      }
+    if (!data || (data._t === undefined || data._t === null)){
+      if (initial) pushRemote(); // remote nog leeg: onze lijst als startpunt zetten
+      else setSyncStatus("Gesynchroniseerd", "ok");
+      return;
+    }
+    if (initial){                     // bij opstarten: gedeelde lijst overnemen
+      adoptRemote(data);
+    } else if (data._t === lastSeenT){ // niets nieuws sinds we laatst keken
       setSyncStatus("Gesynchroniseerd", "ok");
-    } else if (initial){
-      pushRemote(); // remote nog leeg: onze lijst als startpunt zetten
+    } else if (data._by === deviceId){ // onze eigen echo — al lokaal aanwezig
+      lastSeenT = data._t;
+      setSyncStatus("Gesynchroniseerd", "ok");
+    } else {                          // echte wijziging van het andere apparaat
+      adoptRemote(data);
+      setSyncStatus("Bijgewerkt", "ok");
     }
   } catch(e){ setSyncStatus("Offline — lokaal bewaard", "off"); }
 }
@@ -556,6 +604,7 @@ function render(){
     sec.appendChild(cats);
     app.appendChild(sec);
   });
+  applyActiveTab();
   updateProgress();
 }
 
@@ -660,6 +709,8 @@ function updateProgress(){
     const pc = document.querySelector(`[data-pcount="${person.key}"]`);
     if (pf) pf.style.width = pt ? (pd/pt*100)+"%" : "0%";
     if (pc) pc.textContent = pd + "/" + pt;
+    const tc = document.querySelector(`[data-tcount="${person.key}"]`);
+    if (tc) tc.textContent = pd + "/" + pt;
     totAll += pt; doneAll += pd;
   });
   document.getElementById("ofill").style.width = totAll ? (doneAll/totAll*100)+"%" : "0%";
@@ -757,6 +808,8 @@ window.addEventListener("scroll", () => {
 
 /* ---------------- Init ---------------- */
 loadState();
+buildTabs();
+setActivePerson(localStorage.getItem("annecy_tab") || DATA[0].key, false);
 render();
 initSync();
 </script>
