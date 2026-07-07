@@ -1,0 +1,17 @@
+{
+  "name": "Paklijst Annecy 2026",
+  "short_name": "Paklijst",
+  "description": "Afvinkbare paklijst voor de roadtrip naar het meer van Annecy — Tess & Liam.",
+  "lang": "nl",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eceeed",
+  "theme_color": "#0f857c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

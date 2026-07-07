@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Paklijst Annecy 2026 — Tess & Liam</title>
+  <meta name="description" content="Afvinkbare paklijst voor de roadtrip naar het meer van Annecy — Tess & Liam.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f857c">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Paklijst Annecy">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --paper: #eceeed;
+    --card: #f7f8f7;
+    --ink: #16201e;
+    --ink-soft: #4d5c58;
+    --ink-faint: #8b9a95;
+    --line: #d7ddda;
+    --line-soft: #e4e8e6;
+    --lake: #0f857c;
+    --lake-deep: #0a655e;
+    --clay: #c2653a;
+    --clay-deep: #a2502b;
+    --slate: #45607a;
+    --slate-deep: #33495d;
+    --good: #128a5f;
+    --shadow: 0 1px 2px rgba(20,40,36,.05), 0 6px 22px rgba(20,40,36,.06);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0e1615; --card: #16211f; --ink: #e7ecea; --ink-soft: #a7b5b0;
+      --ink-faint: #6d7d78; --line: #263531; --line-soft: #1e2b28;
+      --lake: #38b3a7; --lake-deep: #58c6ba; --clay: #e08a5c; --clay-deep: #ee9d70;
+      --slate: #7ea0be; --slate-deep: #98b6d0; --good: #3fb987;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #eceeed; --card: #f7f8f7; --ink: #16201e; --ink-soft: #4d5c58;
+    --ink-faint: #8b9a95; --line: #d7ddda; --line-soft: #e4e8e6;
+    --lake: #0f857c; --lake-deep: #0a655e; --clay: #c2653a; --clay-deep: #a2502b;
+    --slate: #45607a; --slate-deep: #33495d; --good: #128a5f;
+    --shadow: 0 1px 2px rgba(20,40,36,.05), 0 6px 22px rgba(20,40,36,.06);
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1615; --card: #16211f; --ink: #e7ecea; --ink-soft: #a7b5b0;
+    --ink-faint: #6d7d78; --line: #263531; --line-soft: #1e2b28;
+    --lake: #38b3a7; --lake-deep: #58c6ba; --clay: #e08a5c; --clay-deep: #ee9d70;
+    --slate: #7ea0be; --slate-deep: #98b6d0; --good: #3fb987;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px 80px; }
+
+  header.hero { padding: 44px 0 26px; border-bottom: 1px solid var(--line); }
+  .eyebrow { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--lake); font-weight: 700; margin: 0 0 12px; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif; font-weight: 700;
+    font-size: clamp(34px, 6vw, 58px); line-height: 1.02; letter-spacing: -.01em;
+    margin: 0 0 14px; text-wrap: balance;
+  }
+  h1 .lac { color: var(--lake); font-style: italic; }
+  .route { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--ink-soft); font-size: 15px; }
+  .route .stop { display: inline-flex; align-items: center; gap: 7px; }
+  .route .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lake); flex: none; }
+  .route .arw { color: var(--ink-faint); }
+  .route .meta { color: var(--ink-faint); }
+
+  .toolbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); margin-bottom: 30px;
+  }
+  .toolbar-inner { max-width: 1040px; margin: 0 auto; padding: 13px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .overall { display: flex; align-items: center; gap: 12px; flex: 1 1 240px; min-width: 200px; }
+  .overall .bar { flex: 1; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .overall .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--lake), var(--lake-deep)); border-radius: 99px; transition: width .35s ease; }
+  .overall .count { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  button { font: inherit; }
+  .btn {
+    font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    padding: 8px 13px; border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color .15s, background .15s, transform .05s;
+  }
+  .btn:hover { border-color: var(--lake); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--lake); border-color: var(--lake); color: #fff; }
+  .btn.primary:hover { background: var(--lake-deep); border-color: var(--lake-deep); }
+  .btn.ghost { background: transparent; }
+  :focus-visible { outline: 2px solid var(--lake); outline-offset: 2px; }
+
+  .person { margin-bottom: 40px; scroll-margin-top: 80px; }
+  .person-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 22px; border-bottom: 2px solid var(--accent); }
+  .person-head h2 { font-family: Georgia, serif; font-size: 30px; margin: 0; letter-spacing: -.01em; color: var(--accent-deep); }
+  .person-head .tag { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; }
+  .person-prog { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .person-prog .bar { width: 120px; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .person-prog .fill { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .35s ease; }
+  .person-prog .count { font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  .p-tess   { --accent: var(--lake);  --accent-deep: var(--lake-deep); }
+  .p-liam   { --accent: var(--clay);  --accent-deep: var(--clay-deep); }
+  .p-samen  { --accent: var(--slate); --accent-deep: var(--slate-deep); }
+
+  .cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; align-items: start; }
+  .cat { background: var(--card); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 16px 16px 8px; box-shadow: var(--shadow); }
+  .cat.special { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset, var(--shadow); }
+  .cat h3 { font-size: 12px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent-deep); margin: 2px 0 12px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+  .cat h3 .cc { font-variant-numeric: tabular-nums; color: var(--ink-faint); font-weight: 600; letter-spacing: 0; margin-left: auto; }
+  .cat h3 .cgrip { border: none; background: transparent; color: var(--ink-faint); cursor: grab; padding: 2px 4px 2px 0; font-size: 14px; line-height: 1; letter-spacing: 0; border-radius: 6px; opacity: .5; transition: opacity .15s, color .15s; }
+  .cat:hover h3 .cgrip { opacity: 1; }
+  .cat h3 .cgrip:hover { color: var(--accent); }
+  .cat h3 .cgrip:active { cursor: grabbing; }
+  .cat.dragging { opacity: .6; box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+
+  ul.items { list-style: none; margin: 0; padding: 0; }
+  li.item { border-top: 1px solid var(--line-soft); display: flex; align-items: flex-start; }
+  li.item:first-child { border-top: none; }
+
+  label.check { flex: 1; display: flex; align-items: flex-start; gap: 11px; padding: 9px 2px; cursor: pointer; min-width: 0; }
+  label.check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .box { flex: none; width: 20px; height: 20px; margin-top: 1px; border-radius: 6px; border: 2px solid var(--line); background: transparent; display: grid; place-items: center; transition: all .15s; }
+  .box svg { width: 12px; height: 12px; opacity: 0; transform: scale(.5); transition: all .15s; stroke: #fff; }
+  label.check:hover .box { border-color: var(--accent); }
+  .txt { font-size: 15px; color: var(--ink); transition: color .15s; word-break: break-word; }
+  .txt .note { display: block; font-size: 12.5px; color: var(--ink-faint); margin-top: 1px; }
+  .star { color: var(--accent); font-size: 12px; margin-left: 4px; }
+  input:checked ~ .box { background: var(--accent); border-color: var(--accent); }
+  input:checked ~ .box svg { opacity: 1; transform: scale(1); }
+  input:checked ~ .txt { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--ink-faint); }
+  input:focus-visible ~ .box { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .tools { display: flex; gap: 1px; align-items: center; padding-top: 6px; opacity: .34; transition: opacity .15s; flex: none; }
+  li.item:hover .tools, li.item:focus-within .tools { opacity: 1; }
+  .tools button { border: none; background: transparent; color: var(--ink-faint); padding: 4px 6px; border-radius: 6px; font-size: 13px; line-height: 1; cursor: pointer; }
+  .tools button:hover { background: var(--line-soft); color: var(--accent-deep); }
+  .tools button.del:hover { color: var(--clay); }
+  .tools button.grip { cursor: grab; font-size: 14px; }
+  .tools button.grip:active { cursor: grabbing; }
+  li.item.dragging { opacity: .55; background: var(--line-soft); border-radius: 8px; }
+  li.item.dragging .tools { opacity: 1; }
+
+  .edit-form { display: flex; gap: 6px; width: 100%; padding: 7px 2px; align-items: center; flex-wrap: wrap; }
+  .edit-form input { flex: 1; min-width: 140px; font: inherit; font-size: 15px; padding: 7px 9px; border: 1px solid var(--accent); border-radius: 8px; background: var(--paper); color: var(--ink); }
+  .mini { font-size: 12.5px; font-weight: 600; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  .mini.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .add { display: flex; gap: 7px; padding: 8px 2px 6px; border-top: 1px dashed var(--line); margin-top: 2px; }
+  .add input[type=text] { flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }
+  .add input::placeholder { color: var(--ink-faint); }
+  .add .mini { white-space: nowrap; }
+
+  footer.note { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 13px; text-align: center; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 10px 12px 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); z-index: 50; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; display: flex; align-items: center; gap: 12px; max-width: calc(100% - 32px); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.interactive { pointer-events: auto; }
+  .toast .undo { border: 1px solid rgba(255,255,255,.28); background: transparent; color: #6fe0d3; font: inherit; font-weight: 700; padding: 5px 11px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+  .toast .undo:hover { background: rgba(255,255,255,.1); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print {
+    .toolbar, .actions, .add, .tools { display: none !important; }
+    body { background: #fff; }
+    .cat { break-inside: avoid; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="overall">
+      <div class="bar"><div class="fill" id="ofill"></div></div>
+      <span class="count" id="ocount">0 / 0</span>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btnLink">🔗 Deel-link kopiëren</button>
+      <button class="btn" id="btnText">📋 Als tekst (WhatsApp)</button>
+      <button class="btn ghost" id="btnPrint">🖨️ Print</button>
+      <button class="btn ghost" id="btnReset">↺ Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Roadtrip · Zomer 2026 · 12 dagen</p>
+    <h1>Paklijst <span class="lac">Lac d'Annecy</span></h1>
+    <div class="route">
+      <span class="stop"><span class="dot"></span>Nederland</span><span class="arw">→</span>
+      <span class="stop"><span class="dot"></span>Nancy</span><span class="arw">→</span>
+      <span class="stop"><span class="dot"></span>Annecy</span><span class="arw">→</span>
+      <span class="stop"><span class="dot"></span>Reims</span><span class="arw">→</span>
+      <span class="stop"><span class="dot"></span>thuis</span>
+      <span class="meta">&nbsp;·&nbsp; met de auto &nbsp;·&nbsp; Airbnb met keuken</span>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="note">
+    Alles is aanpasbaar: vink af, versleep (⠿), bewerk (✎) of verwijder (✕) elk item, of voeg zelf iets toe.<br>
+    Je wijzigingen worden automatisch bewaard op dit apparaat en gaan mee in de deel-link. Items met <span style="color:var(--lake)">★</span> waren speciaal aangevraagd.
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- Data ---------------- */
+const DATA = [
+  { key: "tess", name: "Tess", tag: "Persoonlijk", cls: "p-tess", cats: [
+    { title: "Kleding (zomer)", items: [
+      "T-shirts & topjes","Shorts & rokjes","Zomerjurkjes","Nette outfit voor uit eten",
+      "Vest of trui||voor koele avonden aan het meer","Dun regenjack","Ondergoed (±12 dagen)",
+      "Sokken","Pyjama","Zwemkleding ×2","Zonnehoed of pet","Zonnebril" ] },
+    { title: "Schoenen", items: [
+      "Sneakers","Sandalen / slippers","Wandelschoenen","Waterschoenen||kiezelstrand bij het meer" ] },
+    { title: "Toilettas", items: [
+      "Tandenborstel & tandpasta","Shampoo & conditioner","Deodorant","Zonnebrand SPF 30+||hoogzomer",
+      "Aftersun","Haarborstel & elastiekjes","Make-up","Maandverband / tampons","Scheermesje" ] },
+    { title: "Gezondheid & EHBO", items: [
+      "Persoonlijke medicijnen","Pijnstillers (para/ibu)","Muggenspray & after-bite","Pleisters & mini-EHBO" ] },
+    { title: "Meer & strand", items: [
+      "Koeltas||★","Strandlaken ×2","Herbruikbare waterfles","Snorkelset","Boek / e-reader" ] },
+    { title: "Elektronica", items: [ "Telefoon + oplader","Camera + oplader","Powerbank" ] }
+  ]},
+  { key: "liam", name: "Liam", tag: "Persoonlijk", cls: "p-liam", cats: [
+    { title: "Niet vergeten!", special: true, items: [ "Schoenenrekje||★","Stanley coffeemug||★" ] },
+    { title: "Kleding (zomer)", items: [
+      "T-shirts","Shorts","Nette polo of overhemd||voor uit eten","Hoodie of trui||koele avonden",
+      "Dun regenjack","Ondergoed (±12 dagen)","Sokken","Pyjama / slaapshort","Zwembroek ×2","Pet","Zonnebril" ] },
+    { title: "Schoenen", items: [ "Sneakers","Slippers","Wandelschoenen","Waterschoenen||kiezelstrand" ] },
+    { title: "Toilettas", items: [
+      "Tandenborstel & tandpasta","Shampoo & douchegel","Deodorant","Zonnebrand SPF 30+","Scheergerei","Haarwax & kam" ] },
+    { title: "Gezondheid & EHBO", items: [ "Persoonlijke medicijnen","Pijnstillers","Muggenspray & after-bite","Pleisters" ] },
+    { title: "Meer & strand", items: [ "Strandlaken","Waterfles","Snorkelset","Boek" ] },
+    { title: "Elektronica", items: [ "Telefoon + oplader","Laptop + oplader","Camera / GoPro + oplader","Powerbank","Koptelefoon" ] }
+  ]},
+  { key: "samen", name: "Samen — auto & onderweg", tag: "Gedeeld", cls: "p-samen", cats: [
+    { title: "Documenten", items: [
+      "Rijbewijzen (beiden)","Kentekenbewijs","Groene kaart / autoverzekering","Paspoort of ID ×2",
+      "Bevestigingen Airbnb + hotels Nancy & Reims","Zorgpas / EHIC-kaart","Pinpas + wat contant geld" ] },
+    { title: "Verplicht in Frankrijk", special: true, items: [
+      "Gevarendriehoek","Veiligheidshesjes ×2||binnen handbereik in de auto","Reservelampenset",
+      "Verbanddoos","Crit'Air milieuvignet||nodig voor stadscentra","Alcoholtester||aanbevolen" ] },
+    { title: "Onderweg in de auto", items: [
+      "Telefoonhouder + auto-oplader","Snacks & drinken||in de koeltas","Afvalzakjes",
+      "Reiskussen / dekentje","Geld/pas voor tol (péage)","Offline navigatie / kaarten" ] },
+    { title: "Airbnb / verblijf", items: [
+      "Herbruikbare boodschappentas","Vuilniszakken","Reiswasmiddel||tussentijds wassen","Aansteker / lucifers","Keukenhanddoek" ] }
+  ]}
+];
+
+/* ---------------- Parse predefined into stable-id records ---------------- */
+const PARSED = {}; // cid -> [{id, label, note, star}]
+function catId(pk, ci){ return pk + "-" + ci; }
+DATA.forEach(p => p.cats.forEach((cat, ci) => {
+  const cid = catId(p.key, ci);
+  PARSED[cid] = cat.items.map((raw, i) => {
+    const [label, note] = raw.split("||");
+    return { id: cid + "#" + i, label, note: note === "★" ? null : (note || null), star: note === "★" };
+  });
+}));
+
+/* ---------------- State ----------------
+   c: {id:1} checked · l: {id:"label"} edits of predefined
+   d: {id:1} deleted predefined · x: {cid:[{id,label}]} custom items
+   o: {cid:[id,...]} item order within a category
+   co: {personKey:[cid,...]} category-card order within a person           */
+let state = { c: {}, l: {}, d: {}, x: {}, o: {}, co: {} };
+let dragEl = null;   // an item <li> being dragged
+let dragCard = null; // a category card being dragged
+const app = document.getElementById("app");
+
+function b64enc(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function b64dec(s){ try { return JSON.parse(decodeURIComponent(escape(atob(s)))); } catch(e){ return null; } }
+function normalize(o){
+  // Migrate any old-format custom items (plain strings) to {id,label} objects,
+  // and drop anything malformed so a bad cache can never blank the whole list.
+  const x = {}, rawx = (o && o.x) || {};
+  Object.keys(rawx).forEach(cid => {
+    const arr = Array.isArray(rawx[cid]) ? rawx[cid] : [];
+    x[cid] = arr.map((it, i) => (typeof it === "string")
+      ? { id: cid + "#mig" + i, label: it.split("||")[0] }
+      : it
+    ).filter(it => it && typeof it.label === "string" && it.id);
+  });
+  return { c: (o && o.c) || {}, l: (o && o.l) || {}, d: (o && o.d) || {}, x, o: (o && o.o) || {}, co: (o && o.co) || {} };
+}
+
+function loadState(){
+  const h = location.hash.match(/s=([^&]+)/);
+  if (h){ const o = b64dec(h[1]); if (o){ state = normalize(o); return; } }
+  try { const o = JSON.parse(localStorage.getItem("annecy2026")); if (o) state = normalize(o); } catch(e){}
+}
+function saveState(){
+  try { localStorage.setItem("annecy2026", JSON.stringify(state)); } catch(e){}
+  history.replaceState(null, "", "#s=" + b64enc(state));
+}
+
+/* ---------------- Helpers ---------------- */
+function escapeHtml(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function resolve(cid, id, isCustom){
+  if (isCustom){
+    const o = (state.x[cid]||[]).find(it => it.id === id);
+    return o ? { label: o.label, note: null, star: false } : null;
+  }
+  const base = PARSED[cid].find(it => it.id === id);
+  if (!base) return null;
+  return { label: (id in state.l) ? state.l[id] : base.label, note: base.note, star: base.star };
+}
+function setLabel(cid, id, isCustom, val){
+  if (isCustom){ const o = (state.x[cid]||[]).find(it => it.id === id); if (o) o.label = val; }
+  else { const base = PARSED[cid].find(it => it.id === id);
+         if (base && val === base.label) delete state.l[id]; else state.l[id] = val; }
+}
+function nextCustomId(cid){
+  let max = 0;
+  (state.x[cid]||[]).forEach(it => { const m = /#c(\d+)$/.exec(it.id); if (m) max = Math.max(max, +m[1]); });
+  return cid + "#c" + (max + 1);
+}
+function visibleList(cid){
+  const preIds = PARSED[cid].filter(it => !state.d[it.id]).map(it => it.id);
+  const cusIds = (state.x[cid]||[]).map(it => it.id);
+  const customSet = new Set(cusIds);
+  const defaultOrder = preIds.concat(cusIds);
+  let ordered = defaultOrder;
+  if (state.o && state.o[cid]){
+    const present = new Set(defaultOrder);
+    const kept = state.o[cid].filter(id => present.has(id));
+    const seen = new Set(kept);
+    ordered = kept.concat(defaultOrder.filter(id => !seen.has(id))); // new items append at end
+  }
+  return ordered.map(id => ({ id, custom: customSet.has(id) }));
+}
+function persistOrder(cid, ul){
+  state.o[cid] = [...ul.querySelectorAll("li.item")].map(li => li.dataset.id);
+  saveState();
+}
+function getDragAfter(container, y){
+  const els = [...container.querySelectorAll("li.item:not(.dragging)")];
+  let closest = { offset: -Infinity, el: null };
+  els.forEach(child => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) closest = { offset, el: child };
+  });
+  return closest.el;
+}
+
+/* ordered list of {cat, ci, cid} for a person, honouring saved card order */
+function visibleCats(person){
+  const refs = person.cats.map((cat, ci) => ({ cat, ci, cid: catId(person.key, ci) }));
+  if (!state.co || !state.co[person.key]) return refs;
+  const byId = new Map(refs.map(r => [r.cid, r]));
+  const kept = state.co[person.key].filter(cid => byId.has(cid)).map(cid => byId.get(cid));
+  const seen = new Set(kept.map(r => r.cid));
+  return kept.concat(refs.filter(r => !seen.has(r.cid)));
+}
+function persistCatOrder(personKey, cats){
+  state.co[personKey] = [...cats.querySelectorAll(".cat")].map(c => c.dataset.cid);
+  saveState();
+}
+function getDragAfterCard(container, x, y){
+  const els = [...container.querySelectorAll(".cat:not(.dragging)")];
+  let best = { dist: Infinity, el: null, before: true };
+  els.forEach(child => {
+    const box = child.getBoundingClientRect();
+    const cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+    const dist = Math.hypot(x - cx, y - cy);
+    if (dist < best.dist){
+      const sameRow = Math.abs(y - cy) <= box.height / 2;
+      const before = sameRow ? (x < cx) : (y < cy);
+      best = { dist, el: child, before };
+    }
+  });
+  if (!best.el) return null;
+  return best.before ? best.el : best.el.nextElementSibling;
+}
+
+/* ---------------- Render ---------------- */
+function render(){
+  app.innerHTML = "";
+  DATA.forEach(person => {
+    const sec = document.createElement("section");
+    sec.className = "person " + person.cls; sec.id = person.key;
+    const head = document.createElement("div");
+    head.className = "person-head";
+    head.innerHTML =
+      `<h2>${escapeHtml(person.name)}</h2><span class="tag">${escapeHtml(person.tag)}</span>
+       <span class="person-prog"><span class="bar"><span class="fill" data-pfill="${person.key}"></span></span>
+       <span class="count" data-pcount="${person.key}">0/0</span></span>`;
+    sec.appendChild(head);
+
+    const cats = document.createElement("div");
+    cats.className = "cats";
+    visibleCats(person).forEach(({ cat, ci, cid }) => {
+      const card = document.createElement("div");
+      card.className = "cat" + (cat.special ? " special" : "");
+      card.dataset.cid = cid;
+      card.innerHTML = `<h3><button type="button" class="cgrip" title="Sleep om lijst te verplaatsen" aria-label="Lijst verplaatsen">⠿</button><span class="ctitle">${escapeHtml(cat.title)}</span><span class="cc" data-cc="${cid}"></span></h3>`;
+      const cgrip = card.querySelector(".cgrip");
+      cgrip.addEventListener("mousedown", () => { card.draggable = true; });
+      cgrip.addEventListener("mouseup", () => { card.draggable = false; });
+      cgrip.addEventListener("click", e => e.preventDefault());
+      card.addEventListener("dragstart", e => {
+        if (e.target !== card) return; // ignore item drags bubbling up
+        dragCard = card; card.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", cid); } catch(_){}
+      });
+      card.addEventListener("dragend", e => {
+        if (e.target !== card) return;
+        card.classList.remove("dragging"); card.draggable = false; dragCard = null;
+      });
+
+      const ul = document.createElement("ul");
+      ul.className = "items"; ul.dataset.cid = cid;
+      visibleList(cid).forEach(ref => ul.appendChild(makeItem(cid, ref.id, ref.custom)));
+      ul.addEventListener("dragover", e => {
+        if (!dragEl || dragEl.parentNode !== ul) return; // only reorder within the same category
+        e.preventDefault();
+        const after = getDragAfter(ul, e.clientY);
+        if (after == null) ul.appendChild(dragEl);
+        else if (after !== dragEl) ul.insertBefore(dragEl, after);
+      });
+      ul.addEventListener("drop", e => {
+        if (!dragEl || dragEl.parentNode !== ul) return;
+        e.preventDefault(); persistOrder(cid, ul);
+      });
+      card.appendChild(ul);
+
+      const add = document.createElement("div");
+      add.className = "add";
+      add.innerHTML = `<input type="text" placeholder="Zelf toevoegen…" aria-label="Item toevoegen aan ${escapeHtml(cat.title)}">
+                       <button type="button" class="mini primary">Toevoegen</button>`;
+      const inp = add.querySelector("input"), btn = add.querySelector("button");
+      const doAdd = () => {
+        const v = inp.value.trim(); if (!v) return;
+        const id = nextCustomId(cid);
+        state.x[cid] = state.x[cid] || []; state.x[cid].push({ id, label: v });
+        ul.appendChild(makeItem(cid, id, true));
+        inp.value = ""; inp.focus(); saveState(); updateProgress();
+      };
+      btn.addEventListener("click", doAdd);
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") doAdd(); });
+      card.appendChild(add);
+      cats.appendChild(card);
+    });
+    cats.addEventListener("dragover", e => {
+      if (!dragCard || dragCard.parentNode !== cats) return; // only reorder cards within this person
+      e.preventDefault();
+      const after = getDragAfterCard(cats, e.clientX, e.clientY);
+      if (after == null) cats.appendChild(dragCard);
+      else if (after !== dragCard) cats.insertBefore(dragCard, after);
+    });
+    cats.addEventListener("drop", e => {
+      if (!dragCard || dragCard.parentNode !== cats) return;
+      e.preventDefault(); persistCatOrder(person.key, cats);
+    });
+    sec.appendChild(cats);
+    app.appendChild(sec);
+  });
+  updateProgress();
+}
+
+function makeItem(cid, id, isCustom){
+  const data = resolve(cid, id, isCustom);
+  const li = document.createElement("li");
+  li.className = "item";
+  li.dataset.id = id;
+  if (!data) return li;
+
+  li.addEventListener("dragstart", e => {
+    dragEl = li; li.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", id); } catch(_){}
+  });
+  li.addEventListener("dragend", () => { li.classList.remove("dragging"); li.draggable = false; dragEl = null; });
+
+  const lab = document.createElement("label");
+  lab.className = "check";
+  const cb = document.createElement("input");
+  cb.type = "checkbox"; cb.checked = !!state.c[id];
+  cb.addEventListener("change", () => {
+    if (cb.checked) state.c[id] = 1; else delete state.c[id];
+    saveState(); updateProgress();
+  });
+  const box = document.createElement("span");
+  box.className = "box";
+  box.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  const txt = document.createElement("span");
+  txt.className = "txt";
+  txt.innerHTML = escapeHtml(data.label) + (data.star ? '<span class="star">★</span>' : "") +
+                  (data.note ? `<span class="note">${escapeHtml(data.note)}</span>` : "");
+  lab.append(cb, box, txt);
+
+  const tools = document.createElement("div");
+  tools.className = "tools";
+  const grip = document.createElement("button");
+  grip.type = "button"; grip.className = "grip"; grip.title = "Sleep om te verschuiven"; grip.setAttribute("aria-label","Verschuiven"); grip.textContent = "⠿";
+  grip.addEventListener("mousedown", () => { li.draggable = true; });
+  grip.addEventListener("mouseup", () => { li.draggable = false; });
+  grip.addEventListener("click", e => e.preventDefault());
+  const edit = document.createElement("button");
+  edit.type = "button"; edit.title = "Bewerken"; edit.setAttribute("aria-label","Bewerken"); edit.textContent = "✎";
+  const del = document.createElement("button");
+  del.type = "button"; del.className = "del"; del.title = "Verwijderen"; del.setAttribute("aria-label","Verwijderen"); del.textContent = "✕";
+  edit.addEventListener("click", () => enterEdit(li, cid, id, isCustom));
+  del.addEventListener("click", () => {
+    const d = resolve(cid, id, isCustom);
+    const snapshot = JSON.parse(JSON.stringify(state));
+    removeItem(cid, id, isCustom); li.remove(); saveState(); updateProgress();
+    toastUndo("“" + (d ? d.label : "Item") + "” verwijderd", () => {
+      state = snapshot; saveState(); render();
+    });
+  });
+  tools.append(grip, edit, del);
+
+  li.append(lab, tools);
+  return li;
+}
+
+function removeItem(cid, id, isCustom){
+  delete state.c[id]; delete state.l[id];
+  if (isCustom){ state.x[cid] = (state.x[cid]||[]).filter(it => it.id !== id); }
+  else { state.d[id] = 1; }
+}
+
+function enterEdit(li, cid, id, isCustom){
+  const data = resolve(cid, id, isCustom); if (!data) return;
+  li.innerHTML = "";
+  const form = document.createElement("div");
+  form.className = "edit-form";
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.value = data.label;
+  const save = document.createElement("button"); save.className = "mini primary"; save.type = "button"; save.textContent = "Opslaan";
+  const cancel = document.createElement("button"); cancel.className = "mini"; cancel.type = "button"; cancel.textContent = "Annuleer";
+  form.append(inp, save, cancel);
+  li.appendChild(form);
+  inp.focus(); inp.select();
+
+  const rebuild = () => { li.replaceWith(makeItem(cid, id, isCustom)); updateProgress(); };
+  const commit = () => { const v = inp.value.trim(); if (v){ setLabel(cid, id, isCustom, v); saveState(); } rebuild(); };
+  save.addEventListener("click", commit);
+  cancel.addEventListener("click", rebuild);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") commit(); if (e.key === "Escape") rebuild(); });
+}
+
+/* ---------------- Progress ---------------- */
+function updateProgress(){
+  let totAll = 0, doneAll = 0;
+  DATA.forEach(person => {
+    let pt = 0, pd = 0;
+    person.cats.forEach((cat, ci) => {
+      const cid = catId(person.key, ci);
+      const list = visibleList(cid);
+      let ct = list.length, cd = 0;
+      list.forEach(ref => { if (state.c[ref.id]) cd++; });
+      const ccEl = document.querySelector(`[data-cc="${cid}"]`);
+      if (ccEl) ccEl.textContent = cd + "/" + ct;
+      pt += ct; pd += cd;
+    });
+    const pf = document.querySelector(`[data-pfill="${person.key}"]`);
+    const pc = document.querySelector(`[data-pcount="${person.key}"]`);
+    if (pf) pf.style.width = pt ? (pd/pt*100)+"%" : "0%";
+    if (pc) pc.textContent = pd + "/" + pt;
+    totAll += pt; doneAll += pd;
+  });
+  document.getElementById("ofill").style.width = totAll ? (doneAll/totAll*100)+"%" : "0%";
+  document.getElementById("ocount").textContent = doneAll + " / " + totAll + " ingepakt";
+}
+
+/* ---------------- Actions ---------------- */
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.classList.remove("interactive");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function toastUndo(msg, onUndo){
+  const t = document.getElementById("toast");
+  t.innerHTML = "";
+  const span = document.createElement("span"); span.textContent = msg;
+  const btn = document.createElement("button"); btn.className = "undo"; btn.type = "button"; btn.textContent = "↩ Ongedaan maken";
+  btn.addEventListener("click", () => { t.classList.remove("show", "interactive"); onUndo(); });
+  t.append(span, btn);
+  t.classList.add("show", "interactive");
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show", "interactive"), 5000);
+}
+async function copy(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    const ta = document.createElement("textarea"); ta.value = text;
+    ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+    ta.select(); let ok=false; try { ok = document.execCommand("copy"); } catch(_){}
+    ta.remove(); return ok;
+  }
+}
+document.getElementById("btnLink").addEventListener("click", async () => {
+  saveState();
+  const ok = await copy(location.href);
+  toast(ok ? "🔗 Deel-link gekopieerd!" : "Kopiëren mislukt — kopieer de URL handmatig");
+});
+document.getElementById("btnText").addEventListener("click", async () => {
+  let out = "🏔️ PAKLIJST ANNECY 2026 — Tess & Liam\n";
+  DATA.forEach(person => {
+    out += "\n━━ " + person.name.toUpperCase() + " ━━\n";
+    person.cats.forEach((cat, ci) => {
+      const cid = catId(person.key, ci);
+      const list = visibleList(cid);
+      if (!list.length) return;
+      out += "\n" + cat.title + "\n";
+      list.forEach(ref => {
+        const d = resolve(cid, ref.id, ref.custom);
+        out += (state.c[ref.id] ? "☑ " : "☐ ") + d.label + "\n";
+      });
+    });
+  });
+  const ok = await copy(out);
+  toast(ok ? "📋 Lijst als tekst gekopieerd!" : "Kopiëren mislukt");
+});
+document.getElementById("btnPrint").addEventListener("click", () => window.print());
+document.getElementById("btnReset").addEventListener("click", () => {
+  if (confirm("Alles terugzetten naar de originele lijst? Je vinkjes, bewerkingen en toegevoegde items worden gewist.")){
+    state = { c: {}, l: {}, d: {}, x: {}, o: {}, co: {} };
+    localStorage.removeItem("annecy2026");
+    history.replaceState(null, "", location.pathname);
+    render();
+    toast("↺ Lijst teruggezet naar origineel");
+  }
+});
+
+/* ---------------- Init ---------------- */
+loadState();
+render();
+</script>
+
+<script>
+  /* Register the service worker so the list works offline once opened. */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
