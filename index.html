@@ -378,6 +378,7 @@ let lastSeenT = null; // identiteit (_t) van de remote-versie die we nu lokaal w
 let deviceId = localStorage.getItem("annecy2026_dev");
 if (!deviceId){ deviceId = Math.random().toString(36).slice(2) + "-" + Date.now().toString(36); localStorage.setItem("annecy2026_dev", deviceId); }
 let pushTimer = null;
+let dirty = localStorage.getItem("annecy2026_dirty") === "1"; // lokale wijziging nog niet (bevestigd) weggeschreven — overleeft herstart
 function syncOn(){ return /^https?:\/\//.test(SYNC_URL); }
 function setSyncStatus(txt, cls){
   const el = document.getElementById("syncstatus");
@@ -387,21 +388,28 @@ function setSyncStatus(txt, cls){
 }
 function schedulePush(){
   if (!syncOn()) return;
+  dirty = true;
+  try { localStorage.setItem("annecy2026_dirty", "1"); } catch(_){}
   clearTimeout(pushTimer);
-  pushTimer = setTimeout(pushRemote, 700);
+  pushTimer = setTimeout(() => pushRemote(false), 500);
 }
-async function pushRemote(){
+async function pushRemote(keepalive){
   if (!syncOn()) return;
+  clearTimeout(pushTimer);
   const t = Date.now() + "-" + Math.random().toString(36).slice(2, 8); // unieke schrijf-id (geen klokvergelijking tussen apparaten)
   const payload = JSON.stringify({ c: state.c, l: state.l, d: state.d, x: state.x, o: state.o, co: state.co, _t: t, _by: deviceId });
+  const opts = { method: "PUT", headers: { "Content-Type": "application/json" }, body: payload };
+  if (keepalive) opts.keepalive = true; // laat het verzoek de app-afsluiting overleven
   try {
-    setSyncStatus("Synchroniseren…", "busy");
-    const r = await fetch(SYNC_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: payload });
+    if (!keepalive) setSyncStatus("Synchroniseren…", "busy");
+    const r = await fetch(SYNC_URL, opts);
     if (!r.ok) throw new Error("bad");
-    lastSeenT = t; // we geven nu deze schrijfactie weer
+    lastSeenT = t; dirty = false; // we geven nu deze schrijfactie weer
+    try { localStorage.removeItem("annecy2026_dirty"); } catch(_){}
     setSyncStatus("Gesynchroniseerd", "ok");
   } catch(e){ setSyncStatus("Offline — lokaal bewaard", "off"); }
 }
+function flushPush(){ if (syncOn() && dirty) pushRemote(true); }
 function adoptRemote(data){
   state = normalize(data); lastSeenT = data._t;
   try { localStorage.setItem("annecy2026", JSON.stringify(state)); } catch(_){}
@@ -415,17 +423,23 @@ async function pullRemote(initial){
     if (!r.ok) throw new Error("bad");
     const data = await r.json();
     if (!data || (data._t === undefined || data._t === null)){
-      if (initial) pushRemote(); // remote nog leeg: onze lijst als startpunt zetten
+      if (initial) pushRemote(false); // remote nog leeg: onze lijst als startpunt zetten
       else setSyncStatus("Gesynchroniseerd", "ok");
       return;
     }
-    if (initial){                     // bij opstarten: gedeelde lijst overnemen
-      adoptRemote(data);
+    if (initial){
+      // Bij opstarten NIET blind overnemen: was de laatste schrijver dit apparaat
+      // (of hebben we lokaal nog niet-geüploade wijzigingen), dan is lokaal leidend
+      // en schrijven we dat weg. Alleen een schrijfactie van het ándere apparaat nemen we over.
+      if (data._by === deviceId || dirty){ pushRemote(false); }
+      else { adoptRemote(data); }
     } else if (data._t === lastSeenT){ // niets nieuws sinds we laatst keken
       setSyncStatus("Gesynchroniseerd", "ok");
     } else if (data._by === deviceId){ // onze eigen echo — al lokaal aanwezig
       lastSeenT = data._t;
       setSyncStatus("Gesynchroniseerd", "ok");
+    } else if (dirty){                // eigen niet-geüploade wijziging: niet overschrijven
+      setSyncStatus("Synchroniseren…", "busy");
     } else {                          // echte wijziging van het andere apparaat
       adoptRemote(data);
       setSyncStatus("Bijgewerkt", "ok");
@@ -435,9 +449,13 @@ async function pullRemote(initial){
 function initSync(){
   if (!syncOn()){ setSyncStatus("", ""); return; }
   pullRemote(true);
-  setInterval(() => pullRemote(false), 4000);
+  setInterval(() => { if (!document.hidden) pullRemote(false); }, 4000);
   window.addEventListener("online", () => pullRemote(false));
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) pullRemote(false); });
+  window.addEventListener("pagehide", flushPush);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) flushPush();
+    else pullRemote(false);
+  });
 }
 
 /* ---------------- Helpers ---------------- */
